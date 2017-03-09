@@ -1,0 +1,37 @@
+name: Login
+main: Login\Login
+version: "1.2"
+api: [1.12.0, 1.13.0, 2.0.0]
+author: DeBe
+
+commands:
+ login:
+  permission: login.cmd
+  description: <Password>
+  usage: /Login <Password>
+ register:
+  permission: register.cmd
+  description: <Password> <Password>
+  usage: /Register <Password> <Password>
+ change:
+  permission: change.cmd
+  decription: <NewPassword>
+  usage: /Change <NewPassWord>
+ loginop:
+  permission: loginop.cmd
+  description: <UnRegister | Change> <PlayerName>
+  usage: /LoginOP <UnRegister | Change> <PlayerName> 
+
+permissions:
+ login.cmd:
+  default: true
+  description: Login - Login - Command
+ register.cmd:
+  default: true
+  description: Login - Register - Command
+ change.cmd:
+  default: true
+  description: Login - Change - Command
+ loginop.cmd:
+  default: op
+  description: Login - LoginOP - Command
