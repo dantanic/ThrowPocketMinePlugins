@@ -1,0 +1,4 @@
+§a[Money]   §eRank.{RANK}  §6{MONEY}$
+§a[Item]     §6{ITEMNAME} ({ITEMID}:{ITEMDAMAGE})
+§a[Position] §aX: §6{X} §aY: §6{Y} §aZ: §6{Z}
+§a[Players] §c{PLAYERS}§4/§c{MAXPLAYERS}

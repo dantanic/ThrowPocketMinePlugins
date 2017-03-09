@@ -1,0 +1,7 @@
+name: Ingot2Block
+main: MoreCraft\Ingot2Block
+prefix: "§eIngot2Block"
+version: "1.0"
+api: [1.12.0, 1.13.0, 2.0.0]
+author: DeBe
+load: StartUp

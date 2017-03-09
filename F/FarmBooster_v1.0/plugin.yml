@@ -1,0 +1,17 @@
+name: FarmBooster
+main: FarmBooster\FarmBooster
+prefix: "FarmBooster"
+version: "1.0"
+api: [1.13.0, 2.0.0]
+author: DeBe
+load: PostWorld
+
+commands:
+  부스터:
+    permission: farmbooster.cmd
+    description: <시간>(분)
+    usage: /부스터 <시간>(분)
+
+permissions:
+  farmbooster.cmd:
+    default: true

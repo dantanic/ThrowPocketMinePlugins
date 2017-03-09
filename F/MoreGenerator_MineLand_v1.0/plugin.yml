@@ -1,0 +1,15 @@
+name: MineLand
+main: MoreGenerator\MineLand
+prefix: "§eMineLand"
+version: "1.0"
+api: [1.12.0, 1.13.0, 2.0.0]
+author: DeBe
+load: PostWorld
+
+permissions:
+  moregenerator.mineland.*:
+    default: op
+    children:
+      moregenerator.mineland.interact:
+      moregenerator.mineland.place:
+      moregenerator.mineland.break:

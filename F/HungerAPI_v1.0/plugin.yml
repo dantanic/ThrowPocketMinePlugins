@@ -1,0 +1,19 @@
+name: Hunger
+main: Hunger\Hunger
+prefix: "§eHunger"
+version: "1.0"
+api: [1.12.0, 1.13.0, 2.0.0]
+author: DeBe
+load: PostWorld
+
+commands:
+  feed:
+    permission: hunger.cmd.feed
+    description: "[Amount] [PlayerName]"
+    usage: /Feed "[Amount] [PlayerName]"
+
+permissions:
+  hunger.cmd.*:
+    default: op
+    children:
+     commandblock.cmd.feed:

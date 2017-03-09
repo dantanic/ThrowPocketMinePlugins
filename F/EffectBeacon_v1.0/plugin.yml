@@ -1,0 +1,24 @@
+name: EffectBeacon
+main: EffectBeacon\EffectBeacon
+prefix: "§eEffectBeacon"
+version: "1.0"
+api: [1.12.0, 1.13.0, 2.0.0]
+author: DeBe
+load: StartUp
+
+commands:
+  effectbeacon:
+    permission: effectbeacon.cmd
+    description: <Add|Remove|Reload|Save|Reset>
+    usage: /EffectBeacon <Add|Remove|Reload|Save|Reset>
+
+permissions:
+  effectbeacon.cmd.*:
+    default: op
+    children:
+     effectbeacon.cmd.add:
+     effectbeacon.cmd.remove:
+     effectbeacon.cmd.reload:
+     effectbeacon.cmd.save:
+     effectbeacon.cmd.reset:
+       default: console

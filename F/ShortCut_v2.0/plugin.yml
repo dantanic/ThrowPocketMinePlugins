@@ -1,0 +1,27 @@
+name: ShortCut
+main: ShortCut\ShortCut
+prefix: "§eShortCut"
+version: "1.0"
+api: [1.12.0, 1.13.0, 2.0.0]
+author: DeBe
+load: StartUp
+
+commands:
+  shortcut:
+    permission: shortcut.cmd
+    description: <Add|Remove|List|Reload|Save|Reset| Help>
+    usage: /ShortCut <Add|Remove|List|Reload|Save|Reset| Help>
+permissions:
+  shortcut.cmd.*:
+    default: op
+    children:
+     shortcut.cmd.add:
+     shortcut.cmd.remove:
+     shortcut.cmd.list:
+     shortcut.cmd.reload:
+     shortcut.cmd.save:
+     shortcut.cmd.reset:
+       default: console
+     shortcut.cmd.help:
+  shortcut.use:
+    default: true

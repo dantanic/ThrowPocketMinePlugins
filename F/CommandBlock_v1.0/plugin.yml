@@ -1,0 +1,32 @@
+name: CommandBlock
+main: CommandBlock\CommandBlock
+prefix: "§eCommandBlock"
+version: "1.0"
+api: [1.12.0, 1.13.0, 2.0.0]
+author: DeBe
+load: PostWorld
+
+commands:
+  commandblock:
+    permission: commandblock.cmd
+    description: <Add|Remove|BuildMode|Reload|Save|Reset>
+    usage: /CommandBlock <Add|Remove|BuildMode|Reload|Save|Reset>
+
+permissions:
+  commandblock.cmd.*:
+    default: op
+    children:
+     commandblock.cmd.add:
+     commandblock.cmd.remove:
+     commandblock.cmd.buildmode:
+     commandblock.cmd.reload:
+     commandblock.cmd.save:
+     commandblock.cmd.reset:
+       default: console
+  commandblock.use.*:
+    default: true
+    children:
+      commandblock.use.touch:
+        default: true
+      commandblock.use.tread:
+        default: true

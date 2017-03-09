@@ -1,0 +1,71 @@
+name: FarmAPI
+main: Farm\FarmAPI
+prefix: "§eFarm"
+version: "1.0"
+api: [1.13.0, 2.0.0]
+author: DeBe
+load: PostWorld
+
+commands:
+  farm:
+    permission: farm.api.cmd
+    description: <List | Save>
+    usage: /Farm <List | Save>
+  농장:
+    permission: farm.api.cmd.user
+    description: <이동 | 스폰설정 | 레벨업 | 방문 | 초대 | 수락 | 방문허용 | 방문알림 | 방문메세지 | 물흐름 | 전투허용 | 아이템줍기허용 | 정보 | 도움말>
+    usage: /농장 <이동 | 스폰설정 | 레벨업 | 방문 | 초대 | 수락 | 방문허용 | 방문알림 | 방문메세지 | 물흐름 | 전투허용 | 아이템줍기허용 | 정보 | 도움말>
+# 색설정
+
+permissions:
+  farm.api.cmd.*:
+    default: op
+    children:
+     farm.api.cmd:
+     farm.api.cmd.list:
+     farm.api.cmd.save:
+  farm.api.cmd.user.*:
+    default: true
+    children:
+      farm.api.cmd.user:
+        default: true
+      farm.api.cmd.user.move:
+        default: true
+      farm.api.cmd.user.setspawn:
+        default: true
+      farm.api.cmd.user.levelup:
+        default: true
+      farm.api.cmd.user.visit:
+        default: true
+      farm.api.cmd.user.invite:
+        default: true
+      farm.api.cmd.user.accept:
+        default: true
+      farm.api.cmd.user.visitallow:
+        default: true
+      farm.api.cmd.user.visitnotice:
+        default: true
+      farm.api.cmd.user.visitmessage:
+        default: true
+      farm.api.cmd.user.waterflow:
+        default: true
+      farm.api.cmd.user.pvpallow:
+        default: true
+      farm.api.cmd.user.pickupitemallow:
+        default: true
+      farm.api.cmd.user.setcolor:
+        default: true
+      farm.api.cmd.user.info:
+        default: true
+      farm.api.cmd.user.help:
+        default: true
+  farm.api.block.interact:
+    default: op
+  farm.api.block.break:
+    default: op
+  farm.api.block.place:
+    default: op
+  farm.api.pickup.item:
+    default: op
+  farm.api.pvp:
+    default: op    

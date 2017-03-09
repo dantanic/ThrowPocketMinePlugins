@@ -1,0 +1,59 @@
+name: WorldManager
+main: WorldManager\WorldManager
+prefix: "§eWorldManager"
+version: "1.0"
+api: [1.12.0, 1.13.0, 2.0.0]
+author: DeBe
+load: PostWorld
+
+commands:
+ worldmanager:
+  permission: worldmanager.worldmanager.cmd
+  description: <Generate|Load|List|Spawn>
+  usage: /WorldManager <Generate|Load|List|Spawn>
+ worldprotect:
+  permission: worldmanager.worldprotect.cmd
+  description: <Add|Del|Reset|List>
+  usage: /WorldProtect <Add|Del|Reset|List>
+ worldpvp:
+  permission: worldmanager.worldpvp.cmd
+  description: <Add|Del|Reset|List>
+  usage: /WorldPVP <Add|Del|Reset|List>
+ worldinv:
+  permission: worldmanager.worldinv.cmd
+  description: <Add|Del|Reset|List>
+  usage: /WorldInv <Add|Del|Reset|List>
+ setspawn:
+  permission: worldmanager.setspawn.cmd
+  description: <PlayerName>
+  usage: /SetSpawn <PlayerName>
+ spawn:
+  permission: worldmanager.spawn.cmd
+  description: <WorldName>
+  usage: /Spawn <WorldName>
+
+permissions:
+ worldmanager.worldmanager.cmd:
+  default: op
+  description: WorldManager - WorldManager - Command
+ worldmanager.worldprotect.cmd:
+  default: op
+  description: WorldManager - WorldProtect - Command
+ worldmanager.worldprotect.block:
+  default: op
+  description: WorldManager - WorldProtect - Block
+ worldmanager.worldpvp.cmd:
+  default: op
+  description: WorldManager - WorldPVP - Command
+ worldmanager.worldpvp.pvp:
+  default: op
+  description: WorldManager - WorldPVP - PVP
+ worldmanager.worldinv.cmd:   
+  default: op
+  description: WorldManager - WorldInv - Command
+ worldmanager.setspawn.cmd:
+  default: op
+  description: WorldManager - SetSpawn - Command
+ worldmanager.spawn.cmd:
+  default: true
+  description: WorldManager - Spawn - Command

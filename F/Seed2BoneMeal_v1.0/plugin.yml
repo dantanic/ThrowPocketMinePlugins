@@ -1,0 +1,7 @@
+name: Seed2BoneMeal
+main: MoreCraft\Seed2BoneMeal
+prefix: "§eSeed2BoneMeal"
+version: "1.0"
+api: [1.12.0, 1.13.0, 2.0.0]
+author: DeBe
+load: StartUp

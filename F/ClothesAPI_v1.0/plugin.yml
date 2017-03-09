@@ -1,0 +1,45 @@
+name: ClothesAPI
+main: Clothes\ClothesAPI
+prefix: "§eClothes"
+version: "1.5"
+api: [1.12.0, 1.13.0, 2.0.0]
+author: DeBe
+load: StartUP
+
+commands:
+  clothes:
+    permission: clothes.cmd.user
+    description: <Dress|Undress|ThrowAway|Reverse|List|Help>
+    usage: /Clothes <Dress | Undress | ThrowAway | Reverse | List | Help> 
+  clothesapi:
+    permission: clothes.cmd
+    description: <Add|Remove|Give|Take|View|List|Reload|Save|Reset|Help>
+    usage: /ClothesAPI <Add | Remove | Give | Take | View | List | Reload | Save | Reset | Help>
+
+permissions:
+  clothes.cmd:
+    default: op
+    children:
+      clothes.cmd.add:
+      clothes.cmd.remove:
+      clothes.cmd.give:
+      clothes.cmd.take:
+      clothes.cmd.view:
+      clothes.cmd.list:
+      clothes.cmd.reload:
+      clothes.cmd.save:
+      clothes.cmd.reset:
+        default: console
+      clothes.cmd.user:
+        default: true
+        children:
+          clothes.cmd.user.dress:
+            default: true
+          clothes.cmd.user.undress:
+            default: true
+          clothes.cmd.user.remove:
+            default: true
+          clothes.cmd.user.reverse:
+            default: true
+          clothes.cmd.user.list:
+            default: true

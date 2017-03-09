@@ -1,0 +1,17 @@
+name: MineTree
+main: MineTree\MineTree
+prefix: "§eMineTree"
+version: "1.0"
+api: [1.12.0, 1.13.0, 2.0.0]
+author: DeBe
+load: StartUp
+
+commands:
+  minetree:
+    permission: minetree.cmd
+    description: <On|Off>
+    usage: /MineTree <On|Off>
+
+permissions:
+  minetree.cmd:
+    default: op

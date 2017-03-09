@@ -1,0 +1,24 @@
+name: CommandDebug
+main: CommandDebug\CommandDebug
+prefix: "§eCommandDebug"
+version: "1.0"
+api: [1.12.0, 1.13.0, 2.0.0]
+author: DeBe
+load: StartUp
+
+commands:
+  commanddebug:
+    permission: commanddebug.cmd
+    description: <Add|Remove|Reload|Save|Reset>
+    usage: /CommandDebug <Add|Remove|Reload|Save|Reset>
+
+permissions:
+  commanddebug.cmd.*:
+    default: op
+    children:
+     commanddebug.cmd.add:
+     commanddebug.cmd.remove:
+     commanddebug.cmd.reload:
+     commanddebug.cmd.save:
+     commanddebug.cmd.reset:
+       default: console
