@@ -1,0 +1,17 @@
+name: MineBlock
+main: MineBlock\MineBlock
+version: "1.1"
+api: [1.12.0]
+author: DeBe
+website: https://github.com/DeBe0/PocketMine-Plugins
+
+commands:
+ mineblock:
+  permission: mineblock.cmd
+  description: <On|Regen|Block|Delay|Count|Drop|IsDrop|IsSafe>
+  usage: /Mineblock <On|Regen|Block|Delay|Count|Drop|IsDrop|IsSafe>
+
+permissions:
+ mineblock.cmd:
+  default: op
+  description: MineBlock - Command

@@ -1,0 +1,17 @@
+name: NPC
+main: NPC\NPC
+version: "1.2"
+api: [1.12.0]
+author: DeBe
+website: https://github.com/DeBe0/PocketMine-Plugins
+
+commands:
+ npc:
+  permission: npc.cmd
+  description: NPC
+  usage: /NPC <Add|Del|Reset|Respawn>
+
+permissions:
+ npc.cmd:
+  default: op
+  description: NPC - Command

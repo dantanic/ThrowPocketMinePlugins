@@ -1,0 +1,24 @@
+name: MoreInv
+main: MoreInv\MoreInv
+version: "1.2"
+api: [1.12.0]
+author: DeBe
+website: https://github.com/DeBe0/PocketMine-Plugins
+
+commands:
+ moreinv:
+  permission: moreinv.moreinv.cmd
+  description: <My|Buy>
+  usage: /MoreInv <My|Buy>
+ moreinvop:
+  permission: moreinv.moreinvop.cmd
+  description: <Set|Default|Sell|Price|List|Reset>
+  usage: /MoreInvOp <Set|Default|Sell|Price|List|Reset>
+
+permissions:
+ moreinv.moreinv.cmd:
+  default: true
+  description: MoreInv - MoreInv - Command
+ minefarm.minefarm.cmd:
+  default: op
+  description: MoreInv - MoreInvOp - Command

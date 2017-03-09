@@ -1,0 +1,20 @@
+---
+Auto: false
+Sell: false
+Price: 50000.000000
+ColorSell: false
+ColorPrice: 5000.000000
+Distance: 10
+Size: 5.000000
+Air: 5
+Item: false
+Items:
+- - "269:0"
+  - 1
+- - "270:0"
+  - 1
+- - "271:0"
+  - 1
+- - "290:0"
+  - 1
+...

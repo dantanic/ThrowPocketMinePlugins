@@ -1,0 +1,20 @@
+name: ShortCut
+main: ShortCut\ShortCut
+version: "1.1"
+api: [1.12.0]
+author: DeBe
+website: https://github.com/DeBe0/PocketMine-Plugins
+
+commands:
+ shortcut:
+  permission: shortcut.cmd
+  description: <Add|Del|Reset|List>
+  usage: /ShortCut <Add|Del|Reset|List>
+
+permissions:
+ shortcut.cmd:
+  default: op
+  description: ShortCut - Command
+ shortcut.use:
+  default: true
+  description: ShortCut - Use the shortcut
