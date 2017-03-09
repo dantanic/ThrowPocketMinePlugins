@@ -1,0 +1,324 @@
+<?php
+/*
+__PocketMine Plugin__
+name=HungerGame - WNB Server
+version=0.1.0
+author=DeBe
+class=Hunger_Game
+apiversion=11,12
+*/
+
+class Hunger_Game implements Plugin {
+	private $api;
+
+	public function __construct(ServerAPI $api, $server = false){
+		$this->api = $api;
+		$this->Hunger = array();
+		$this->HG = array();
+		$this->HGs = array();
+		$this->Start = 0;
+		$this->FeildName = null;
+		$this->Life = array();
+		$this->Chest = array();
+	}
+	public function init(){
+		$this->api->console->register("hg", "HungerGame Command",array($this,"Commander"));
+		$Path = $this->api->plugin->configPath($this);
+		$this->api->addHandler("player.block.touch", array($this, "MainHandler"));
+		$this->api->addHandler("player.interact", array($this, "SubHandler"));
+	 	$this->api->addHandler("player.death", array($this, "DeathHandler"));
+		$this->api->addHandler("player.respawn", array($this, "DeathHandler"));
+		$this->HungerGame = new Config($Path."HungerGame.yml", CONFIG_YAML);
+		$this->HungerChest = new Config($Path."HungerChest.yml", CONFIG_YAML);
+		$ReadHunger = $this->api->plugin->readYAML($Path."HungerGame.yml");
+		$this->ReadHunger();
+	}
+
+	public function Commander($cmd,$params,$issuer,$alias){
+		$Pr0 = strtolower($params[0]);
+		$Pr1 = strtolower($params[1]);
+		$Pr2 = strtolower($params[2]);
+		$U = $issuer->username;
+		switch($Pr0){
+			case "start":
+				if($this->Start == 0){
+					$this->GameWait();
+					return "[HG] 게임을 시작합니다.";
+				}else{
+					return "[HG] 이미 게임중입니다.";
+				}
+			break;
+
+			case "stop":
+			 if($this->Start !== 0){
+					$this->GameStop();
+					return "[HG] 게임을 종료하였습니다.";
+				}else{
+					return "[HG] 게임을 먼저 시작해주세요.";
+				}
+			break;
+
+			case "set":
+			 if($issuer != "console"){
+					if(isset($this->HG[$U])){
+						if($this->HG[$U][1] == 3){
+			 				$this->CreateFeild($this->HGs);
+			 				$N = $this->HG[$U][0];
+			 				unset($this->HG[$U]);
+			 				return "[HG][$N] 필드생성이 완료되었습니다.";
+			 		 	}else{
+						 $N = $this->HG[$U][0];
+						 unset($this->HG[$U]);
+						 return "[HG][$N] 필드설정을 완료하지않아 저장되지않습니다.";
+			  		}
+					}elseif($Pr1 == null){
+						return "[HG] /HG set <필드명>";
+					}else{
+						$this->HG[$U] = array($Pr1,0);
+						return "[HG][$Pr1] 대기로비를 터치해주세요.";
+					}
+				}else{
+					return "[HG] Please run Commamd in Game";
+				}
+			break;
+	 			
+			case "reset":
+			 	foreach($this->Hunger as $K => $H){
+					unset($this->Hunger[$K]);
+					$this->Hunger->setAll($this->Hunger);
+					$this->Hunger->save();
+					$this->GameStop();
+				}
+				return "[HG] HG 필드 리셋 완료";
+			break;
+			
+			case "chest":
+			 if($issuer != "console"){
+					switch($Pr1){
+						case "add":
+						 	$this->Chest[$U] = "add";
+							return "[HG] 적용할 창고를 터치하세요.";
+						break;
+						
+						case "del":
+	 						$this->Chest[$U] = "del";
+							return "[HG] 제거할 창고를 터치하세요.";
+						break;
+						
+						default:
+							return "[HG] Usage: /HG <Add|Del>";
+					}
+				}else{
+					return "[HG] Please run Commamd in Game";
+				}
+			break;
+			
+			default:
+			 return "[HG] Usage: /HG <Start|Stop|Set|Del|Reset>";
+			break;
+		}
+	}
+
+	public function MainHandler($data){
+		$P = $data["player"];
+		$U = $P->username;
+		if(isset($this->HG[$U])){
+			$Set0 = $this->HG[$U][0];
+			$Set1 = $this->HG[$U][1];
+			$Name = $Set0;
+			$this->HGs[$Set0] = array();
+			switch($Set1){
+				case 0:
+					$T = $data["target"];	$X=$T->x;	$Y=$T->y;	$Z=$T->z;	$Ln=$T->level->getName();
+					$this->HG[$U] = array($Set0,1);
+					$this->HGs = array("Name" => $Set0,"Wait_X" => $X, "Wait_Y" => $Y, "Wait_Z" => $Z, "WorldName" => $Ln);
+					$P->sendChat("[HG][$Name] 대기로비를 설정했습니다. 죽을시 갈 장소를 정해주세요.");
+				break;
+
+				case 1:
+					$T = $data["target"];	$X=$T->x;	$Y=$T->y;	$Z=$T->z;
+			 		$this->HG[$U] = array($Set0,2);
+			 		$this->HGs = array("Name" => $Name,"Wait_X" => $this->HGs["Wait_X"], "Wait_Y" => $this->HGs["Wait_Y"], "Wait_Z" => $this->HGs["Wait_Z"], "Death_X" => $X, "Death_Y" => $Y, "Death_Z" => $Z, "WorldName" => $this->HGs["WorldName"]);
+					$P->sendChat("[HG][$Name] 죽을시 갈 장소를 설정했습니다. 시작시 태어날곳을 정해주세요.");
+				break;
+				
+				case 2:
+				case 3:
+					$T = $data["target"];	$X=$T->x;	$Y=$T->y;	$Z=$T->z;
+			 		$this->HG[$U] = array($Set0,3);
+					if(!isset($this->HGs["StartPosition"])) $this->HGs["StartPosition"] = array();
+					array_push($this->HGs["StartPosition"], array($X, $Y, $Z));
+					$P->sendChat("[HG][$Name] 시작시 태어날 장소를 정했습니다.");
+					if($Set1 == 2) $P->sendChat("[HG][$Name] 그만 정하시려면 /HG Set 을 다시 쳐주세요.");
+				break;
+			}
+		}elseif(isset($this->Chest[$U])){
+			if($this->Chest[$U] == add){
+				if($data["target"]->getID() == 54){
+					$P->sendChat("[HG] 창고 적용되었습니다.");
+					$T = $data["target"];	$X=$T->x;	$Y=$T->y;	$Z=$T->z;	$L=$T->level; $Ln=$T->level->getName();
+					$Tile = $this->api->tile->get(new Position($X, $Y, $Z, $L));
+					$Chest = array();
+					for($i = 0; $i < 27; $i++){
+						$Chest[] = array($Tile->getSlot($i)->getID(),$Tile->getSlot($i)->count,$Tile->getSlot($i)->getMetadata());
+					}
+					$Config = $this->api->plugin->readYAML($this->api->plugin->configPath($this). "HungerChest.yml");
+					$Config[$X.":".$Y.":".$Z.":".$Ln] = $Chest;
+					$this->api->plugin->writeYAML($this->api->plugin->configPath($this)."HungerChest.yml", $cfg);
+					unset($this->Chset[$U]);
+				}else{
+					$P->sendChat("[HG] 창고를 터치해주세요.");
+				}
+			}elseif($this->Chest[$U] == "del"){
+				if($data["target"]->getID() == 54){
+					$P->sendChat("[HG] 창고 해제되었습니다.");
+					$T = $data["target"];	$X=$T->x;	$Y=$T->y;	$Z=$T->z;	$L=$T->level; $Ln=$T->level->getName();
+					$Tile = $this->api->tile->get(new Position($X, $Y, $Z, $L));
+					$Config = $this->api->plugin->readYAML($this->api->plugin->configPath($this). "Chest.yml");
+					unset($Config[$X.":".$Y.":".$Z.":".$Ln]);
+					$this->api->plugin->writeYAML($this->api->plugin->configPath($this)."Chest.yml", $cfg);
+					unset($this->Chset[$U]);
+				}else{
+					$P->sendChat("[HG] 창고를 터치해주세요.");
+				}				
+			}
+		}elseif($this->Start !== 2 or $this->Life[$data["player"]->username] == 0){
+			return false;
+		}
+	}
+
+	public function SubHandler($data){
+		if($this->Start !== 2 or $this->Life[$data["player"]->username] == 0) return false;
+	}
+	
+	public function DeathHandler($data,$event){
+		$P = $data["player"];
+		$U = $P->username;
+		switch($event){
+			case "player.death":
+				$this->Life[$U] = 0;
+				$LifeMan = array();
+				foreach($this->api->player->getAll() as $P){
+					if($this->Life[$U] == 1) array_push($LifeMan,$U);
+				}
+				$Count = count($LifeMan);
+				if($Count = 1){
+					$this->GameEnd($U);
+				}
+			break;
+			
+			case "player.respawn":
+			 if($this->Life[$U] == 0){
+			 		foreach($this->Hunger as $H){
+						if($H["Name"] == $this->FeildName){
+							$L = $this->api->level->get($H["WorldName"]);
+							$Air = BlockAPI::getItem(Air, 0, 0);	$AirArmor = array($Air, $Air, $Air, $Air);
+							$P->teleport(new Position($H["Wait_X"],$H["Wait_Y"],$H["Wait_Z"], $L));
+							$P->armor = $AirArmor;	$P->sendArmor($P);
+							$P->inventory = array();	$P->sendInventory();
+							$P->entity->setHealth(20, "console", false);
+						}
+					}
+			 }
+			break;
+		}
+	}
+
+	public function CreateFeild($H){
+		$this->Hunger[] = array("Name" => $H["Name"], "Wait_X" => $H["Wait_X"], "Wait_Y" => $H["Wait_Y"], "Wait_Z" => $H["Wait_Z"], "Death_X" => $H["Death_X"], "Death_Y" => $H["Death_Y"], "Death_Z" => $H["Death_Z"], "WorldName" => $H["WorldName"], "StartPosition" => $H["StartPosition"]);
+		$this->HungerGame->setAll($this->Hunger);
+		$this->HungerGame->save();
+	}
+	
+	public function ReadHunger(){
+		$Path = $this->api->plugin->configPath($this);
+		$ReadHunger = $this->api->plugin->readYAML($Path."HungerGame.yml");
+		if(is_array($ReadHunger)){
+			foreach($ReadHunger as $H){
+				$this->Hunger[] = array("Name" => $H["Name"], "Wait_X" => $H["Wait_X"], "Wait_Y" => $H["Wait_Y"], "Wait_Z" => $H["Wait_Z"], "WorldName" => $H["WorldName"], "Death_X" => $H["Death_X"], "Death_Y" => $H["Death_Y"], "Death_Z" => $H["Death_Z"], "StartPosition" => $H["StartPosition"]);
+			}
+		}
+	}
+
+	public function GameWait(){
+		$this->Start = 1;
+		if(!count($this->Hunger)){
+console("count not");
+			$this->ReadHunger();
+		}
+		$HG = $this->Hunger;
+		$HG = shuffle($HG);
+		$H = array_shift($HG);
+		console($H[0]["WorldName"]);
+		$L = $this->api->level->get($H["WorldName"]);
+		foreach($this->api->player->getAll() as $P)	$P->teleport(new Position($H["Wait_X"],($H["Wait_Y"]+1),$H["Wait_Z"], $L));
+		$this->api->chat->broadcast("[HG] Please Wait... After 5 minutes, start the game!");
+		$this->api->schedule(6000,array($this,"GameStart"),array($H));
+	}
+	 
+	public function GameStart($H){
+		$this->Start = 2;
+		if($this->Start == 1){
+			foreach($this->api->player->getAll() as $P){
+	 			$F = array_rand($H["StartPosition"],1);
+				$L = $this->api->level->get($H["WorldName"]);
+				$P->teleport(new Position($F[0],($F[1]+1),$F[2],$L));
+	 			$this->Life[$P->username] = 1;
+			}
+			$this->api->chat->broadcast("[HG] Are you Ready? 20 seconds to unlock the Invincible!");
+			$this->api->schedule(400,array($this,"StartSet"));
+		}
+	}
+
+	public function StartSet(){
+		if($this->Start == 2){
+ 			$this->api->chat->broadcast("[HG] Now unlock the Invincible! Let's Fight!");
+			$this->Start = 2;
+		}
+	}
+
+	public function GameStop(){
+		foreach($this->Hunger as $H){
+			if($H["Name"] == $this->FeildName){
+				$L = $this->api->level->get($H["WorldName"]);
+				$Air = BlockAPI::getItem(Air, 0, 0);	$AirArmor = array($Air, $Air, $Air, $Air);
+				foreach($this->api->player->getAll() as $P){
+	 				$this->Life[$P->username] = 1;
+					$P->teleport(new Position($H["Wait_X"],($H["Wait_Y"]+1),$H["Wait_Z"], $L));
+					$P->armor = $AirArmor;	$P->sendArmor($P);
+					$P->inventory = array();	$P->sendInventory();
+					$P->entity->setHealth(20, "console", false);
+					$P->entity->close();
+				}
+			}
+		}
+		$this->api->chat->broadcast("[HG] Game is Stop");
+		$this->Start = 0;
+	}
+	
+	public function GameEnd($Winner){
+		foreach($this->Hunger as $H){
+			if($H["Name"] == $this->FeildName){
+				$L = $this->api->level->get($H["WorldName"]);
+				$Air = BlockAPI::getItem(Air, 0, 0);	$AirArmor = array($Air, $Air, $Air, $Air);
+				foreach($this->api->player->getAll() as $P){
+					$P->teleport(new Position($H["Wait_X"],($H["Wait_Y"]+1),$H["Wait_Z"], $L));
+					$P->armor = $AirArmor;	$P->sendArmor($P);
+					$P->inventory = array();	$P->sendInventory();
+					$P->entity->setHealth(20, "console", false);
+					$P->entity->close();
+				}
+			}
+		}
+		$this->api->chat->broadcast("[HG] Game is End. Winner is [".$Winner."]");
+		$this->Start = 0;
+		$this->api->chat->broadcast("[HG] Please Wait... After 5 minutes, start the game!");
+		$this->schedule(6000, "GameStart",array());
+	}
+	
+	public function __destruct(){
+		$this->HungerGame->setAll($this->Hunger);
+		$this->HungerGame->save();
+		$this->Hunger = array();
+	}
+}

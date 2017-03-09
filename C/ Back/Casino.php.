@@ -1,0 +1,193 @@
+<?php
+
+/*
+__PocketMine Plugin__
+name=Economy Casino
+version=
+author=
+apiversion=12
+class=EconomyCasino
+*/
+
+class EconomyCasino implements Plugin{
+	private $api;
+
+	public function __construct(ServerAPI $api, $server = false){
+		$this->api = $api;
+		$this->Casino = array();
+	}
+
+	public function init(){
+		if(!isset($this->api->economy) or !$this->api->economy instanceof EconomyAPI){
+			console("[ERROR] EconomyAPI does not exist");
+			$this->api->console->run("stop");
+			return;
+		}
+		$this->api->console->register("casino", "<개설|참가|퇴장|베팅>", array($this, "Commander"));
+		$this->api->ban->cmdWhitelist("casino");
+		$this->api->addHandler("player.quit", array($this, "QuitHandler"));
+		$this->Msg = $this->api->plugin->readYAML($this->api->plugin->createConfig($this,array(
+			"Open" => array(
+				"Msg" => " [도박] 도박장을 개설하였습니다.",
+				"Broad" => " [도박] %1님이 도박장을 개설하셨습니다.",
+				"Already" => " [도박] 이미 도박중이십니다.",
+			),
+			"Join" => array(
+				"Msg" => " [도박] %1님의 도박장에 참가하셨습니다.",
+				"Broad" => " [도박] %1님이 도박장에 참가하셨습니다.",
+				"Already" => " [도박] 이미 도박중이십니다.",
+				"Fail" => " [도박] %1이라는 도박장은 없습니다.",
+			),
+			"Quit" => array(
+				"Msg" => " [도박] %1님의 도박장에서 퇴장하셨습니다.",
+				"Msg_Own" => " [도박] 도박장을 닫았습니다.",
+				"Broad" => " [도박] %1님이 도박장에서 퇴장하셨습니다.",
+				"Broad_Own" => " [도박] %1님의 도박장이 닫혔습니다.",
+				"Already" => " [도박] 아직 도박중이 아닙니다.",
+			),
+			"Bett" => array(
+				"Msg" => " [도박] %1원 베팅하셨습니다.",
+				"Msg_Allin" => " [도박] 올인하셨습니다.",
+				"Msg_Winner" => " [도박][%1] %2원을 따셨습니다!",
+				"Broad" => " [도박][%1] %2원이 베팅되었습니다.",
+				"Broad_Winner" => " [도박][%1] %2님이 %3원을 따가셨습니다 !",
+				"Already" => " [도박] 아직 도박중이 아님니다.",
+				"Fail_Allin" => " [도박] 당신은 올인상태입니다.",
+				"Fail_Other" => " [도박] %1님이 올인상태입니다.",
+				"Fail_One" => " [도박] 도박장에 사람이 부족합니다.",
+				"Fail_Error" => " [도박] 오류로 인해 베팅이 실패하였습니다.",
+			),
+		))."config.yml");
+ }
+
+ public function Commander($cmd,$params,$issuer){
+		if($issuer == "console") return "Please run this command in-game.";
+		$Msg = $this->Msg;
+		$P = $issuer;
+		$Pn = $P->username;
+		$Pi = $P->iusername;
+		$Pr0 = $params[0];
+	 	$Pr1 = strtolower($params[1]);
+		switch($Pr0){
+			case "개설":
+				$Open = $Msg["Open"];
+			 	if(isset($this->Casino[$Pi])) return $Open["Already"];
+				foreach($this->Casino as $Casino) if(in_array($Pi, $Casino["List"])) return $Open["Already"];
+				$this->casino[$Pi] = array("Own" => $Pn, "List" => array($Pi));
+				$Msg = $Open["Broad"];
+				$Msg = str_replace("%1", $Pn, $Msg);
+				$this->api->chat->broadcast($Msg);
+				return $Open["Msg"];
+			break;
+			case "참가":
+				$Join = $Msg["Join"];
+ 				if(str_replace(" ", "", $pr1) == "" or !is_numeric($pr1)) return " [도박] /도박 참가 <이름>";
+				if(isset($this->Casino[$Pi])) return $Join["Already"];
+				foreach($this->Casino as $Casino) if(in_array($Pi, $Casino["List"])) return $Join["Already"];
+				if(!isset($this->Casino[$Pr1])) return $Join["Fail"];
+				foreach($this->Casino[$Pr1]["List"] as $Name) $this->api->player->get($Name)->sendChat($Join["Broad"]);
+				$this->Casino[$Pr1]["List"][] = $Pi;
+				return $Join["Msg"];
+			break;
+			case "퇴장":
+				$Quit = $Msg["Quit"];
+				$In = false;
+				foreach($this->Casino as $Casino){
+					if(in_array($Pi, $Casino["List"])){
+						$In = $Casino["Own"];
+						break;
+					}
+				}
+				if($In == false) return $Quit["Already"];
+				if($In == $Pn){
+	 				foreach($this->Casino[$Pr1]["List"] as $Name){
+	 					$Msg = $Quit["Broad_Own"];
+						$Msg = str_replace("%1", $In, $Msg);
+	 					if($Pi !== $Name) $this->api->player->get($Name)->sendChat($Msg);
+	 				}
+					unset($this->Casino[$Pi]);
+					return $Quit["Msg_Own"];
+				}else{
+	 				foreach($this->Casino[$Pr1]["List"] as $Player){
+	 					$Broad = $Quit["Broad"];
+						$Broad = str_replace("%1", $In, $Broad);
+	 					if($Pi !== $Player) $this->api->player->get($Player)->sendChat($Broad);
+	 				}
+	 				unset($this->Casino[$In][array_search($Pi,$this->Casino[$In])]);
+					$Msg = $Quit["Msg"];
+					$Msg = str_replace("%1", $In, $Msg);
+					return $Msg;
+				}
+			break;
+			case "베팅":
+				$Bett = $Msg["Bett"];
+ 				if(str_replace(" ", "", $Pr1) == "" or !is_numeric($Pr1)) return " [도박] /도박 베팅 <금액>";
+				$In = false;
+				foreach($this->Casino as $Casino){
+					console($Casino["List"][0]);
+					if(in_array($Pi, $Casino["List"])){
+						$In = $Casino["Own"];
+						break;
+					}
+				}
+				if($In == false) return $Bett["Already"];
+				if($this->api->economy->myMoney($P) < 1) return $Bett["Fail_Allin"];
+				$List = $this->Casino[$In]["List"];
+				if(count($List)<= 1) return $Bett["Fail_One"];
+				$Other = false;
+				foreach($List as $Name){
+					if($this->api->economy->mymoney($Name) < 1){
+						$Other = $Name;
+						break;
+					}
+				}
+				if($Other !== false){
+					$Msg = $Bett["Fail_Other"];
+					$Msg = str_replace("%1", $Other, $Msg);
+					return $Msg;
+				}
+				$R = array_rand($List);
+				$Winner = $this->api->player->get($List[$R]);
+				if(!$Winner instanceof Player) return $Bett["Fail_Error"];
+				$BettMoney = floor($Pr1);
+				$Money = 0;
+				foreach($List as $Name){
+					$Player = $this->api->player->get($Name);
+					if($this->api->economy->mymoney($Name) < $BettMoney){
+						$Money += $this->api->economy->mymoney($Name);
+						$this->api->economy->setMoney($Name, 0);
+						$Msg = $Bett["Msg_Allin"];
+						$Msg = str_replace("%1", $Pn, $Msg);
+						$Player->sendChat($Msg);
+					}else{
+						$Money += $BettMoney;
+						$this->api->economy->useMoney($Name,$BettMoney);
+						$Msg = $Bett["Broad"];
+						$Msg = str_replace("%1", $Pn, $Msg);
+						$Player->sendChat($Msg);
+					}
+					$this->api->economy->takeMoney($List[$E],$Money);
+					$Msg = $Bett["Msg_Winner"];
+					$Msg = str_replace("%1", $Pn, $Msg);
+					$Msg = str_replace("%2", $Money, $Msg);
+					$Winner->sendChat($Msg);
+					$Msg = $Bett["Broad_Winner"];
+					$Msg = str_replace("%1", $Pn, $Msg);
+					$Msg = str_replace("%2", $Winner->username, $Msg);
+					$Msg = str_replace("%3", $Money, $Msg);
+					if($Name !== $List[$R]) $this->api->player->get($Name)->sendChat($Msg);
+				}
+			break;
+			default:
+				return " [도박] /도박 <개설|참여|퇴장|베팅>";
+			break;
+		}
+	}
+
+	public function QuitHandler($data){
+		
+	}
+
+	public function __destruct(){
+	}
+}

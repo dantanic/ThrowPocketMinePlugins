@@ -1,0 +1,337 @@
+<?php
+
+/*
+__KillDeath Plugins__
+name=MineCombat
+version=0.1.0
+author=DeBe
+apiversion=12
+class=MineCombat
+*/
+
+class MineCombat implements Plugin{
+	private $api;
+
+	public function __construct(ServerAPI $api, $server =false){
+		$this->api = $api;
+		$this->KillDeath = array();
+		$this->Set = array("Start" => 0, "SchduleID" => 0);
+	}
+
+	public function init(){
+		$Register = array(
+			array("mca","OP"),
+			array("mc","Player")
+		);
+		$Alias = array(
+			array("시작","mca start"),
+			array("중지","mca stop"),
+		);
+		$AddHandler = array(
+			array("player.join","Join"),
+			array("player.spawn","Join"),
+			array("player.respawn","Join"),
+	 		array("player.action","Touch"),
+			array("player.block.touch","Touch"),
+			array("entity.health.change","Health"),
+		);
+		foreach($Register as $r) $this->api->console->register($r[0], "KillDeath.".$r[1]." Command", array($this, "Commander"));
+		foreach($Alias as $a)	$this->api->console->alias($a[0],$a[1]);
+		$this->api->ban->cmdWhitelist("mc");
+		foreach($AddHandler as $ah) $this->api->addHandler($ah[0], array($this,$ah[1]."_Handler"));
+	}
+
+	public function Commander($cmd,$params,$issuer){
+		$cmd =strtolower($cmd);
+		switch($cmd){
+			case "mc":
+				if(strtolower($params[0]) == " " or $params[0] == null){
+					if($this->Set["Start"] == 0){
+						$params[0] = "start";
+			 		}else{
+						$params[0] = "stop";
+					}
+				}
+				switch(strtolower($params[0])){
+					case "faststart":
+					case "fstart":
+					case "f":
+					case "start":
+					case "s":
+						if($this->Set["Start"] !== 0){
+				 			return "  [A] 이미 게임중입니다.";
+				 		}else{
+							$time = 5;
+							if(is_numeric($time) !== false and isset($params[1])) $time = (int) $params[1];
+							switch(strtolower($params[0])){
+								case "faststart":
+								case "fstart":
+								case "f":
+								 	$this->Start = 1;
+									$this->GameStart($time);
+								break;
+								case "start":
+								case "s":
+								 $this->Wait($time);
+								break;
+							}
+						}
+					}
+					break;	
+					case "stop":
+					case "st":
+						if($this->Set["Start"] == 0){
+	 						return "  [A] 아직 게임중이 아닙니다.";
+						}else{
+							$this->GameStop(0);
+						}
+					break;
+					case "inv":
+			 			if($this->Set["Start"] == 0){
+	 						return "  [A] 아직 게임중이 아닙니다.";
+						}elseif($this->Set["Start"] == 1){
+							$this->Set["Start"] = 2;
+	 						$this->Broadcast("  [A] 초반무적이 해제됩니다.");
+						}else{
+							$this->Set["Start"] = 1;	
+							$this->Broadcast("  [A] 초반무적이 실행됩니다.");
+						}
+					break;
+					default:
+						return "/MCA <Start|Faststart|Stop|Inv|Set";
+	 				break;
+				}
+			break;
+			case "mc":
+			 if($this->Set["Start"] == 0){
+			 		return "  [A] 게임이 시작되지 않았습니다.";
+			 }elseif(!$issuer instanceof Player){
+					return "[A] 게임내에서만 사용해주세요.";
+				}else{
+			 		$A = $this->KillDeath[$issuer->username];
+					$M = array(
+					"°°°°°°°°°°°°°°°°",
+	 				"  이름 : ".$A["Name"]." [".$A["AP"]." / ".$A["Rank"]." 랭크]",
+					"  능력 : ".$A["Info"],
+					"  쿨탐 : ".$A["Cool"]."초     Code-[".$A["KillDeath"]."/44]",
+					"°°°°°°°°°°°°°°°°",
+					);
+					foreach ($M as $m){
+						$issuer->sendChat($m);
+					}
+				}
+			break;
+		}
+	}
+
+	public function Join_Handler($data,$event){
+	 if($this->Set["Start"] !== 0){
+			if(!isset($this->KillDeath[$data->username])) $this->setKillDeath($data);
+				$data->removeItem(406,0,999);
+			 	$data->addItem(406,0,1);
+ 			}
+		}
+	}
+
+	public function Touch_Handler($data,$event){
+	 if($this->Set["Start"] !== 0){
+			$P = $data["player"];
+			$I = $data["item"];
+			$A = $this->KillDeath[$P->username];
+			$CT = microtime(true) - $A["Cool"]; 						
+			if($CT <= 0 and $I == 406){
+				$this->KillDeath[$P->username]["Cool"] = microtime(true) + 50;
+				$this->KillDeath[$P->username]["Bullet"] -= 1;
+				$e = $P->entity;
+				$eY = $e->yaw;
+				$eP = $e->pitch;
+				$Vs = -sin($eY/180 *M_PI);
+				$Vc = cos($eY/180*M_PI);
+				$Vt = -sin($eP/180*M_PI);
+				$Vp = cos($eP/180*M_PI);
+				$X = round($e->x); 
+				$Y = round($e->y)+1; 
+				$Z = round($e->z);
+				$L = $e->level;
+				for($f=0; $f < 55; ++$f){
+					$X += $Vs * $Vp;
+					$Y += $Vt;
+					$Z += $Vc * $Vp;
+					$Vec = new Vector3(round($X),round($Y),round($Z));
+					if($f > 50 or $X < 0 or $X > 256 or $Y < 0 or $X > 128 or $Z < 0 or $X > 256){
+						break;
+					}else{
+						foreach($L->players as $Pl){
+							$Pe = $Pl->entity;
+							$Plvec = new Vector3($Pe->x, $Pe->y, $Pe->z);
+							if($Vec->distance($Plvec) <= 2){
+								$Pe->harm(10,$P->eid);
+							}
+						}
+					break;
+					}
+				}
+			}
+		}
+	}
+
+	public function Health_Handler($data){
+		if($this->Set["Start"] !== 0){
+			$e = $data["entity"];
+			if($e->player instanceof Player){
+				$IT = microtime(true) - $this->KillDeath[$e->name]["Inv"];
+				if($IT < 0){
+					return false;
+				}elseif($data["health"] < 1){
+					$this->KillDeath[$e->name]["Point"] -= 50;
+					$this->KillDeath[$e->name]["Death"] += 1;
+					$e->heal(12*34*50,"MineCombat");
+					$e->harm(12*34*56,"MineCombat");
+					if(is_numeric($data["cause"])){
+						$P = $this->server->api->player->get($data["cause"]);
+			 			if($P instanceof Player){
+			 				$this->KillDeath[$e->name]["Point"] += 50;
+							$this->KillDeath[$e->name][""] += 1;
+			 				$this->Broadcast("  [A] ".$e->name."님이 ".$P->username."님에게 사살당하셨습니다.");
+			 			}
+					}
+ 				}
+			}
+		}
+	}
+
+	public function Wait($time){
+		$this->Set["Start"] = 1;
+		$M = array(
+			" ",
+			"°°°°°°°°°°°°°°°°",
+			"  [A] 마인컴뱃   제작 :: 데베 (huu6677@naver.com)",
+			"  [A] 총은 석영입니다.",
+			"°°°°°°°°°°°°°°°°",
+ 			" ",
+			"  [A] 잠시후 게임이 시작됩니다.",
+			" ",
+		);
+		$T = 0;
+		foreach($M as $m){
+			if($this->Set["Start"] == 1){
+	 			$T += 15;
+				$this->api->schedule($T,array($this,"Broadcast"),$m);
+			}
+		}
+		$M = array(
+			"  [A] 시작 5초전",
+			"  [A] 시작 4초전",
+			"  [A] 시작 3초전",
+			"  [A] 시작 2초전",
+			"  [A] 시작 1초전",
+		);
+		$T = 180;
+		foreach($M as $m){
+			if($this->Set["Start"] == 1){
+				$this->api->schedule($T,array($this,"Broadcast"),$m);
+				$T += 20;
+			}
+		}
+		if($this->Set["Start"] == 1) $this->api->schedule(300,array($this,"GameStart"),$time); 	
+	}
+
+	public function GameStart($time){
+		if($this->Set["Start"] == 1){
+			$this->Broadcast("°°°°°°°°°°°°°°");
+			$this->Broadcast("  [A] 게임이 시작되었습니다!");
+			$this->Broadcast("  [A] 게임시간 : ".$time."분");
+ 			$this->Broadcast("°°°°°°°°°°°°°°");
+ 			$this->Broadcast(" ");
+ 			$R = rand(1,99) * rand(1,99) * rand(1,99) * rand(1,99);
+ 			$this->Set["ScheduleID"] = $R;
+ 			$this->Set["Start"] = 2;
+ 			$this->api->schedule(20*60*$time,array($this,"Stop"),$R);
+ 			foreach($this->api->player->getAll() as $P){
+ 				$P->entity->setHealth(20);
+ 				$this->setKillDeath($P);
+				$P->removeItem(406,0,999);
+			 	$P->addItem(406,0,1);
+			}
+ 		}
+	}
+
+	public function GameStop($R,$Why = 1){
+		if($this->Set["ScheduleID"] == $R){
+			switch($Why){
+				case "0":
+			 		$this->Broadcast("  [A] 관리자가 게임을 종료하였습니다.");
+				break;
+				case "1":
+			 		$this->Broadcast("  [A] 게임시간이 종료되었습니다.");
+				break;
+				default:
+					$this->Broadcast("  [A] 오류발생 Error-".$Why);
+				break;
+			}
+			$this->Broadcast("  [A] 게임이 종료되었습니다.");
+			krsort($this->KillDeath);
+			
+ 			$this->KillDeath = array();
+			$this->Set = array("Start" => 0, "SchduleID" => 0);
+		}
+	}
+
+	public function Broadcast($m){
+	 if($this->Set["Start"] !== 0) $this->api->chat->broadcast($m);
+	}
+
+	public function setKillDeath($P,$R){
+		$Pn = $P->username;
+ 		$this->KillDeath[$Pn] = array("Point" => 1000, "Kill" => 0, "Death" => 0, "Cool" => 0);
+ 	}
+
+	public function View($P,$Type,$Limit){
+		$e = $P->entity;
+		$eY = $e->yaw;
+		$eP = $e->pitch;
+		$Vs = -sin($eY/180 *M_PI);
+		$Vc = cos($eY/180*M_PI);
+		$Vt = -sin($eP/180*M_PI);
+		$Vp = cos($eP/180*M_PI);
+		$X = round($e->x); 
+		$Y = round($e->y)+1; 
+		$Z = round($e->z);
+		$L = $e->level;
+		for($f=0; $f < 999; ++$f){
+			$X += $Vs * $Vp;
+			$Y += $Vt;
+			$Z += $Vc * $Vp;
+			$Vec = new Vector3(round($X),round($Y),round($Z));
+			$B = $L->getBlock($Vec);
+			if($f > $Limit or $X < 0 or $X > 256 or $Y < 0 or $X > 128 or $Z < 0 or $X > 256){
+				return false;
+			}else{
+				switch($Type){
+					case 1:
+						if($B->isSolid !== false){
+	 						return $B;
+						}
+					break;
+					case 2:
+						foreach($L->players as $Pl){
+							if($P !== $Pl and $this->KillDeath[$Pl->username]["Life"] !== 0){
+								$Pe = $Pl->entity;
+								$Plvec = new Vector3($Pe->x, $Pe->y, $Pe->z);
+								if($Vec->distance($Plvec) <= 2){
+									return $Pl;
+								}
+							}
+						}
+					break;
+				}
+			}
+		}
+	}
+
+	public function LoadBlock($P){
+	}
+
+	public function __destruct(){
+	}
+}

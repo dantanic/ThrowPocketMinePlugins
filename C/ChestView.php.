@@ -1,0 +1,54 @@
+<?
+/*
+__DeBe_Plugins__
+name=Chest View
+version=0.1.0
+author=DeBe
+apiversion=11,12
+class=ChestView
+*/
+
+class ChestView implements Plugin{
+	private $api;
+	public function __construct(ServerAPI $api, $server =false){
+		$this->api =$api;
+		$this->ChestView = array();
+	}
+	public function init() {
+	 	$this->api->addhandler("player.block.touch",array($this,"MainHandler"));
+		$this->api->console->register("chestview", "Chest View /ChestView",array($this,"Commander"));
+		$this->api->console->alias("ChestView","chestview");
+	}
+	
+	public function Commander($cmd,$args,$issuer, $alias){
+		if($issuer === "console"){
+			return "[ChestView] Please run this in game";
+		}else{
+			$this->ChestView[$issuer->username] = true;
+			return "[ChestView] Please touch target chest";
+		}
+	}
+
+ 	public function MainHandler($data) {
+		$T = $data["target"];
+		$P = $data["player"];
+		$Pn = $P->username;
+		if(isset($this->ChestView[$Pn])){
+			if($T->getID() == 54){
+				$T = $this->api->tile->get(new Position($T->x, $T->y, $T->z, $T->level));
+				$ChestView = array();
+				for($i = 0; $i < 27; $i++){
+					if($T->getSlot($i)->getID() !== 0 and $T->getSlot($i)->count > 0){
+						$ChestView[] = $T->getSlot($i)->getID().":".$T->getSlot($i)->getMetadata()."(".$T->getSlot($i)->count.")";
+					}
+				}
+				$P->sendChat("[ChestView] ".implode(" , ",$ChestView));
+				unset($this->ChestView[$Pn]);
+				return false;
+			}
+		}
+	}
+
+ public function __destruct(){
+ }
+}

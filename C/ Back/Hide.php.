@@ -1,0 +1,441 @@
+<?php
+
+/*
+__PocketMine Plugin__
+name=Block Hide [Test]
+version=0.1.1
+author=DeBe
+class=Block_Hide
+apiversion=12
+*/
+
+class Block_Hide implements Plugin{
+	private $api;
+	
+	public function __construct(ServerAPI $api, $server = false){
+		$this->api = $api;
+		$this->Hide = array();
+		$this->Hint = 5;
+		$this->Set = array();
+		$this->SL = array();
+		$this->Start = 0;
+		$this->Stoped = 0;
+	}
+	
+	public function init(){
+		DataPacketSendEvent::register(array($this, "dataPacketHandler"), EventPriority::HIGHEST);
+		$this->api->console->register("bh", "BlockHide Command",array($this,"Commander"));
+	 	$this->api->addhandler("player.join",array($this,"Join_Handler"));
+		$this->api->addhandler("player.quit",array($this,"Join_Handler"));
+	 	$this->api->addhandler("player.block.touch",array($this,"AttackHide_Handler"));
+		$this->api->addhandler("player.block.break",array($this,"AttackHide_Handler"));
+		$this->api->addhandler("player.interact",array($this,"Attack_Handler"));
+		$this->api->addhandler("player.death",array($this,"Death_Handler"));
+		$this->api->addhandler("entity.move",array($this,"UnHide_Handler"));
+		$this->api->addHandler("player.pickup", array($this, "HintPickupHandler"));
+	}
+	
+	public function Join_Handler($data,$event){
+		
+	}
+
+	public function Commander($cmd,$params,$issuer){
+		switch(strtolower($params[0])){
+			case "start":
+				if($this->Start == 0){
+					if(count($this->api->player->getAll()) > 1){
+						$T = 5;
+						if(isset($params[1])) $T = (int) $params[1];
+						$SL = $this->api->player->get($params[2]);
+	 					$Ps = $this->api->player->getAll();
+	 					if($SL == false) $SL = $Ps[array_rand($Ps)];
+						$this->Set = array($SL,$SL->username,$T);
+						$this->Wait();
+						$this->SL[$SL->username] = array();
+						return "[BH] 게임을 시작했습니다.";
+					}else{
+						return "[BH] 플레이어가 너무 적습니다.";
+					}
+				}else{
+					return "[BH] 이미 게임중입니다.";
+				}
+			break;	
+			
+			case "stop":
+				if($this->Start !== 0){
+					$this->GameStop($this->Stoped,0);
+				}else{
+					return "[BH] 아직 게임중이 아닙니다.";
+				}
+			break;
+			default:
+				return "/BH Start <Time> <Player> or /BH Stop";
+	 		break;
+		}
+	}
+	public function Death_Handler($data){
+		$P = $data["player"];
+		if(isset($this->SL[$P->username])){
+			$this->GameStop($this->Stoped,3);
+		}else{
+			$C = 0; 			
+			foreach($this->api->player->getAll() as $P){
+ 				if(!isset($this->SL[$P->username])) $C += 1;
+ 			}if($C = 0) $this->GameStop($this->Stoped,2);
+		}
+	}
+
+	public function AttackHide_Handler($data){ 
+		$T = $data["target"];	$P = $data["player"]; $I = $data["item"];
+		$X = $T->x; $Y = $T->y; $Z = $T->z;
+		if($I->getID() == 351 and $I->getMetadata() == 1){
+			if(isset($this->SL[$P->username])){
+				if($this->Hint == 0){
+					$P->sendChat("[BH] 힌트 5번을 모두 사용하셨습니다.");
+				}else{
+					foreach($this->api->player->getAll() as $Pl){
+						if(!isset($this->SL[$Pl->username])){
+						 $this->Hint($Pl);
+						}
+					}
+					$this->Hint -= 1;
+					$P->sendChat("[BH] 힌트를 사용했습니다.");
+					$P->sendChat("[BH] 남은 힌트 : ".$this->Hint);
+				}
+			}else{
+				if(!isset($this->Hide[$P->eid])) $this->Hide($P);
+			}
+		}else{
+			foreach($this->api->player->getAll() as $Pl){
+				if(isset($this->Hide[$Pl->eid])){ $H = $this->Hide[$Pl->eid];
+					if($X == $H["X"] and $Y == $H["Y"] and $Z == $H["Z"]){
+						if($P !== $H["Player"]){
+							switch($I->getID()){ 							
+								case WOODEN_PICKAXE:
+								case GOLD_PICKAXE:
+								case STONE_SHOVEL:
+									$D = 2;
+								break;
+								case WOODEN_AXE:
+								case GOLD_AXE: 					
+								case STONE_PICKAXE:
+								case IRON_SHOVEL:
+								$D = 3;
+								break;	
+								case WOODEN_SWORD:
+								case GOLD_SWORD:
+								case STONE_AXE:
+								case IRON_PICKAXE:
+								case DIAMOND_SHOVEL:
+									$D = 4;
+								break;
+								case STONE_SWORD:
+								case IRON_AXE:
+								case DIAMOND_PICKAXE:
+								$D = 5;
+								break;
+								case IRON_SWORD:
+								case DIAMOND_AXE:
+									$D = 6;
+								break;
+								case DIAMOND_SWORD:
+									$D = 7;
+								break;
+								default:
+								$D = 1;
+								break;
+							}
+							$H["Player"]->entity->harm($D,$P->eid);
+							$this->Hide($H["Player"]);
+						} return false;
+					}
+				}
+			}
+		} return false;
+	}
+	
+	public function Attack_Handler($data){
+	 	$T = $data["targetentity"];	$P = $data["entity"]; 
+	 	$e = $this->api->entity->get($P->eid);
+		$I = $e->player->getSlot($e->player->slot);
+		if(isset($this->SL[$P->eid])){
+	 		switch($I->getID()){ 							
+			case WOODEN_PICKAXE:
+			case GOLD_PICKAXE:
+			case STONE_SHOVEL:
+				$D = 2;
+			break;
+			case WOODEN_AXE:
+			case GOLD_AXE: 					
+			case STONE_PICKAXE:
+			case IRON_SHOVEL:
+				$D = 3;
+			break;	
+			case WOODEN_SWORD:
+			case GOLD_SWORD:
+			case STONE_AXE:
+			case IRON_PICKAXE:
+			case DIAMOND_SHOVEL:
+				$D = 4;
+			break;
+			case STONE_SWORD:
+			case IRON_AXE:
+			case DIAMOND_PICKAXE:
+			$D = 5;
+			break;
+			case IRON_SWORD:
+			case DIAMOND_AXE:
+				$D = 6;
+			break;
+			case DIAMOND_SWORD:
+				$D = 7;
+			break;
+			default:
+				$D = 1;
+			break;
+		}
+		$T->harm($D,$P->eid);
+		}
+	}
+
+	
+	public function dataPacketHandler(DataPacketSendEvent $event){
+		$PK = $event->getPacket();
+		if($PK instanceof MovePlayerPacket){
+			if(isset($this->Hide[$PK->eid])){
+				$event->setCancelled();
+			}
+		}
+	}
+	
+	public function Hide($P){
+		$e = $P->entity;
+		$X = round($e->x - 0.5); $Y = round($e->y); $Z = round($e->z - 0.5); $Level = $e->level;
+	 	$B = $Level->getBlock(new Vector3($X, $Y-1, $Z));
+		if(isset($this->Hide[$e->eid])){
+			$H = $this->Hide[$e->eid];
+			unset($this->Hide[$e->eid]);
+			$this->Name[$e->eid] = true;
+			$pk = new MovePlayerPacket;
+			$pk->eid = $e->eid;
+			$pk->x = $H["X"];
+			$pk->y = $H["Y"];
+			$pk->z = $H["Z"];
+			$pk->yaw = 0;
+			$pk->pitch = 0;
+			foreach($this->api->player->getAll() as $Pl){
+				if($Pl->spawned === true and $Pl !== $P){
+					$Pl->dataPacket($pk);
+				}
+			}
+			$P->teleport(new Vector3($X+0.5, $Y, $Z+0.5));
+			$Level->setBlockRaw(new Vector3($H["X"],$H["Y"],$H["Z"]),BlockAPI::get(0,0),false);
+			$P->sendChat("[BH] 숨기가 풀렸습니다!");
+		}else{
+			$pk = new MovePlayerPacket;
+			$pk->eid = $e->eid;
+			$pk->x = -256;
+			$pk->y = 128;
+			$pk->z = -256;
+			$pk->yaw = 0;
+			$pk->pitch = 0;
+			foreach($this->api->player->getAll() as $Pl){
+				if($Pl->spawned === true and $Pl->entity !== $e){
+					$Pl->dataPacket($pk);
+				}
+			}
+			$Level->setBlockRaw(new Vector3($X,$Y,$Z),BlockAPI::get($B->getID(),$B->getMetadata()),false);
+			$P->teleport(new Vector3($X+0.5, $Y, $Z+0.5));
+			$this->Hide[$e->eid] = array("X" => $X, "Y" => $Y, "Z" => $Z, "Player" => $P);
+			$P->sendChat("[BH] 숨었습니다!");
+		}
+	}
+	
+	public function UnHide_Handler($data){
+		$e = $data;
+		if($e->class == ENTITY_PLAYER){
+			$P = $e->player;
+			$X = round($e->x - 0.5); $Y = round($e->y); $Z = round($e->z - 0.5); $Level = $P->level;
+			if(isset($this->Hide[$e->eid])){
+				$H = $this->Hide[$e->eid];
+				if($X !== $H["X"] or $Y !== $H["Y"] or $Z !== $H["Z"]){
+					$this->Hide($P);
+				}
+			}
+		}
+	}
+
+	public function HintPickupHandler($data){
+		if($data["entity"]->stack == 0) return false;
+	}
+	
+	public function Hint($P){
+		$T = 0;
+		foreach(array(1,2,3,4,5,6,10,11,14,0) as $B){
+			$this->api->schedule($T,array($this,"Hint_Item"),$P->username);
+			//$this->api->schedule($T,array($this,"Hint_Block"),array($P->username,$B));
+			$T += 10;
+		}
+	}
+	
+/*	public function Hint_Block($A){
+		$Pn = $A[0]; $MT = $A[1]; $ID = 35;
+		$P = $this->api->player->get($Pn);
+		$e = $P->entity;
+		$X = round($e->x - 0.5); $Y = round($e->y); $Z = round($e->z - 0.5); $Level = $e->level;
+		$B = $Level->getBlock(new Vector3($X, $Y-1, $Z));
+		if($MT == 0){
+			$ID = $B->getID();
+			$MT = $B->getMetadata();
+		}
+		$pk = new UpdateBlockPacket;
+		$pk->x = $X;
+		$pk->y = $Y;
+		$pk->z = $Z;
+		$pk->block = $ID;
+		$pk->meta = $MT;
+		$this->api->player->broadcastPacket($e->level->players, $pk);
+	}*/
+
+
+	public function Hint_Item($Pn){
+		$P = $this->api->player->get($Pn);
+		$e = $P->entity;
+		$X = round($e->x - 0.5); $Y = round($e->y); $Z = round($e->z - 0.5); $Level = $e->level;
+		foreach(array(1,4,5,7,9,10,11,12,13,14 ) as $a){
+			$I = BlockAPI::fromString("351:".$a);
+			$I->count = 0;
+			$D = array(
+				"x" => $X + 0.5,
+				"y" => $Y + 1.19,
+				"z" => $Z + 0.5,
+				"level" => $Level,
+				"item" => $I,
+			);
+			$e = $this->api->entity->add($Level, ENTITY_ITEM,$I->getID(),$D);
+			$e->speedX = mt_rand(-10,10) / 2;
+	 		$e->speedY = mt_rand(3,5) / 2;
+			$e->speedZ = mt_rand(-10,10) / 2;
+			$this->api->entity->spawnToAll($e);
+			
+		}
+		$this->api->schedule(5,array($this,"UnHint"),array());
+	}
+
+	public function UnHint(){
+		foreach($this->api->entity->getAll() as $e){
+			if($e->class == ENTITY_ITEM and $e->stack == 0){
+				$this->api->entity->remove($e->eid);
+			}
+		}
+	}
+	
+	public function Wait(){
+		$M = array(
+			"[BH] 블럭 숨바꼭질",
+			"[BH]",
+			"[BH] 붉음염료로 땅을 치면 사용됩니다.",
+			"[BH] 블럭유저 : 숨기 (이동시해제)",
+			"[BH] 술래유저 : 힌트 (5회).",
+		);
+		$T = 0;
+		foreach ($M as $m) {
+			$T += 5;
+			$this->api->schedule($T,array($this,"Broadcast"),$m);
+		}
+		$M = array(
+			"[BH] 시작 5초전",
+			"[BH] 시작 4초전",
+			"[BH] 시작 3초전",
+			"[BH] 시작 2초전",
+			"[BH] 시작 1초전",
+		);
+		$T = 30;
+		foreach ($M as $m) {
+			$this->api->schedule($T,array($this,"Broadcast"),$m);
+			$T += 20;
+		}
+	 	$this->api->schedule(130,array($this,"GameStart")); 	
+	}
+
+	public function Broadcast($m){
+		$this->api->chat->broadcast($m);
+	}
+
+	public function GameStart(){
+		$this->Broadcast("°°°°°°°°°°°°°°");
+		$this->Broadcast("[BH] 게임이 시작되었습니다!");
+		$this->Broadcast("[BH] 술래 : ".$this->Set[1]."님");
+		$this->Broadcast("[BH] 시간 : ".$this->Set[2]."분");
+ 		$this->Broadcast("°°°°°°°°°°°°°°");
+ 		$R = mt_rand(1,999999);
+ 		$this->api->schedule(20*60*$this->Set[2] - 150,array($this,"StopWait"),$R);
+ 		$this->Stoped = $R;
+ 		$this->Start = 1;
+ 		foreach($this->api->player->getAll() as $P){
+ 			if(isset($this->SL[$P->username])) $P->addItem(276,-9999,1);
+ 				$P->addItem(351,1,1);
+ 				//$P->addItem(278,-9999,1);
+ 		}
+	}
+
+	public function StopWait($R){
+		$this->Broadcast("[BH] 잠시후 게임이 종료됩니다.");
+		if($this->Stoped == $R){
+			$M = array(
+			"[BH] 종료 5초전",
+			"[BH] 종료 4초전",
+			"[BH] 종료 3초전",
+			"[BH] 종료 2초전",
+			"[BH] 종료 1초전",
+			);
+			$T = 50;
+			foreach ($M as $m) {
+				if($this->Stoped == $R){
+					$this->api->schedule($T,array($this,"Broadcast"),$m);
+					$T += 20;
+				}
+			}
+			$this->api->schedule(150,array($this,"GameStoped"),$R);
+		}
+	}
+	public function GameStoped($R){$this->GameStop($R,1);}
+
+	public function GameStop($R,$N){
+		if($this->Stoped == $R){
+			switch($N){
+				case "0":
+				 	$this->Broadcast("[BH] 관리자가 게임을 종료하였습니다.");
+				break;
+				case 1:
+					$this->Broadcast("[BH] 술래가 패배하였습니다.");
+				break;
+				case 2:
+	 				$this->Broadcast("[BH] 술래가 승리하였습니다.");
+				break;
+				case 3:
+					$this->Broadcast("[BH] 술래가 사망하였습니다.");
+				break;
+				default:
+				break;
+			}
+			$this->Broadcast("[BH] 게임이 종료되었습니다.");
+			$this->Stoped = 0;
+			$this->Hide = array();
+			$this->Hint = 5;
+			$this->Set = array();
+			$this->SL = array();
+			$this->Start = 0;
+			foreach($this->api->player->getAll() as $P){
+				foreach($P->inventory as $slot => $I){
+					if($I->getID() == 351 and $I->getMetadata() == 1) $P->removeItem(351,1,100);
+	 				if($I->getID() == 276) $P->removeItem(276,$I->getMetadata(),100);
+		 			if($I->getID() == 278) $P->removeItem(278,$I->getMetadata(),100);
+				}
+			}
+		}
+	}
+
+	public function __destruct(){
+	}
+}

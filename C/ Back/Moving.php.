@@ -1,0 +1,102 @@
+<?php
+
+/*
+__Pet Plugins__
+name=Pet
+version=0.1.0
+author=DeBe
+apiversion=12
+class=Pet
+*/
+
+class Pet implements Plugin{
+	private $api;
+
+	public function __construct(ServerAPI $api, $server =false){
+		$this->api = $api;
+		$this->Pet = array();
+	}
+
+	public function init(){
+		$AddHandler = array(
+			array("player.join","Spawn"),
+			array("player.spawn","Spawn"),
+			array("player.respawn","Spawn"),
+			array("player.teleport.level","Spawn"),
+ 			array("player.quit","Spawn"),
+			array("entity.health.change","Health"),
+			array("entity.move","Move"),
+ 		);
+		foreach($AddHandler as $ah) $this->api->addHandler($ah[0], array($this,$ah[1]."_Handler"));
+	}
+
+	public function Spawn_Handler($data,$event){
+		switch($event){
+			case "player.join":
+			case "player.spawn":
+			case "player.respawn":
+				if(isset($this->Pet[$data->eid])){
+					$this->api->entity->get($this->Pet[$data->eid])->close();
+					unset($this->Pet[$data->eid]);
+				}
+ 			break;
+			case "player.quit":
+		 	case "player.teleport.level":	
+				if(isset($this->Pet[$data->eid])){
+					$this->api->entity->get($this->Pet[$data->eid])->close();
+					unset($this->Pet[$data->eid]);
+				}
+			break;
+		}
+	}
+
+ 	public function Health_Handler($data){
+		$e = $data["entity"];
+		if($data["health"] < 1){
+			if($e->class instanceof ENTITY_PLAYER){
+				$this->api->entity->get($this->Pet[$data->eid])->close();
+				unset($this->Pet[$data->eid]);
+ 			}elseif($e->class instanceof ENTITY_MOB){
+				if($e->type instanceof MOB_CHICKEN){
+					foreach($this->api->player->getAll() as $P){
+						if(isset($thia->Pet[$Pl->eid])){
+							if($this->Pet[$Pl->eid] == $e->eid){
+								unset($this->Pet[$Pl->eid]);
+								$e->close();
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public function Move_Handler($data){
+		if($data->class == ENTITY_PLAYER){
+			if(!isset($this->Pet[$data->eid])){
+				$D = array(
+					"x" => $data->x,
+					"y" => $data->y,
+					"z" => $data->z,
+				);
+				$Pet = $this->api->entity->add($data->level, ENTITY_MOB, MOB_CHICKEN, $D);
+				$this->api->entity->spawnToAll($Pet);
+				$this->Pet[$data->eid] = $Pet->eid;
+ 			}else{
+				$pk = new MovePlayerPacket;
+				$pk->x = $data->x;
+				$pk->y = $data->y;
+				$pk->z = $data->z;
+				$pk->yaw = $data->yaw;
+				$pk->bodyYaw = $data->yaw;
+				$pk->pitch = $data->pitch;
+				$pk->eid = $this->Pet[$data->eid];
+				$data->player->dataPacket($pk);
+			}
+		}
+	}
+	
+	public function __destruct(){
+	}
+}
