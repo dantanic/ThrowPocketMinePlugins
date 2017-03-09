@@ -1,0 +1,23 @@
+name: OreBlock
+main: OreBlock\OreBlock
+version: "1.0"
+api: [1.12.0]
+author: DeBe
+website: http://DeBe.ml
+
+commands:
+ oreblock:
+  permission: oreblock.cmd
+  description: <[On/Off]|Regen|Block|Delay|Count|Drop|IsDrop|IsSafe>
+  usage: /Oreblock <[On/Off]|Regen|Block|Delay|Count|Drop|IsDrop|IsSafe>
+
+permissions:
+ orrblock.cmd:
+  default: op
+  description: OreBlock - Command
+ oreblock.place:
+  default: op
+  description: OreBlock - Block Place
+ oreblock.break:
+  default: true
+  description: OreBlock - Block Break

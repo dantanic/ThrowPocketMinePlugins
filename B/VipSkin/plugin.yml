@@ -1,0 +1,18 @@
+name: VipSkin
+main: MineBlock\VipSkin\VipSkin
+version: "1.0"
+api: [1.12.0]
+author: MineBlock
+description: MineBlock's Plugin
+website: http://MineBlock.zz.am
+
+commands:
+ vipskin:
+  permission: vipskin.cmd
+  description: VipSkin
+  usage: /VipSkin <Add|Del|List>
+
+permissions:
+ vipskin.cmd:
+  default: op
+  description: VipSkin - Command

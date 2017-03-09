@@ -1,0 +1,17 @@
+name: ClearEntities
+main: ClearEntities\ClearEntities
+version: "1.0"
+api: [1.12.0]
+author: DeBe
+website: http://DeBe.ml
+
+commands:
+ clearentities:
+  permission: clearentities.cmd
+  description: <All|Item|Arrow|Mob> <View|Clear>
+  usage: /ClearEntities <All|Item|Arrow|Mob> <View|Clear>
+
+permissions:
+ clearentities.cmd:
+  default: op
+  description: ClearEntities - Command

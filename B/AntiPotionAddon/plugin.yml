@@ -1,0 +1,6 @@
+name: AntiPotionAddon
+main: AntiPotionAddon\AntiPotionAddon
+version: "1.0"
+api: [1.12.0]
+author: DeBe
+website: http://DeBe.ml

@@ -1,0 +1,17 @@
+name: Cheque
+main: Cheque\Cheque
+version: "1.0"
+api: [1.12.0]
+author: DeBe
+website: http://DeBe
+
+commands:
+ cheque:
+  permission: cheque.cmd
+  description: <Amount>
+  usage: /Cheque <Amount>
+
+permissions:
+ cheque.cmd:
+  default: true
+  description: Cheque - Command

@@ -1,0 +1,17 @@
+name: AntiExplosion
+main: AntiExplosion\AntiExplosion
+version: "1.0"
+api: [1.12.0]
+author: DeBe
+website: http://DeBe.ml
+
+commands:
+ antiexplosion:
+  permission: antiexplosion.cmd
+  description: <On | Off | Protect>
+  usage: /AntiExplosion <On | Off | Protect>
+
+permissions:
+ antiexplosion.cmd:
+  default: op
+  description: AntiExplosion - Command

@@ -1,0 +1,32 @@
+name: OpLogin
+main: MineBlock\OpLogin\OpLogin
+version: "1.0"
+api: [1.12.0]
+author: MineBlock
+description: MineBlock's Plugin
+website: http://MineBlock.zz.am
+
+commands:
+ oplogin:
+  permission: oplogin.cmd
+  description: OpLogin - Login
+  usage: /OPLogin <Password>
+ opregister:
+  permission: opregister.cmd
+  description: OpLogin - Register
+  usage: /OPRegister <Pasrword> <Password>
+ oploginop:
+  permission: oploginop.cmd
+  description: OpLogin - LoginOP
+  usage: /LoginOP <View | UnRegister | Change> <PlayerName> 
+
+permissions:
+ oplogin.cmd:
+  default: true
+  description: OpLogin - Login - Command
+ opregister.cmd:
+  default: true
+  description: OpLogin - Register - Command
+ oploginop.cmd:
+  default: op
+  description: OpLogin - LoginOP - Command

@@ -1,0 +1,18 @@
+name: RubyNPC
+main: MineBlock\RubyNPC\RubyNPC
+version: "1.0"
+api: [1.12.0]
+author: MineBlock
+description: MineBlock's Plugin
+website: http://MineBlock.zz.am
+
+commands:
+ npc:
+  permission: npc.cmd
+  description: RubyNPC
+  usage: /NPC <Add|Del|Reset|Respawn>
+
+permissions:
+ npc.cmd:
+  default: op
+  description: RubyNPC - Command

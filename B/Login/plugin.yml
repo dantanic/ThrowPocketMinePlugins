@@ -1,0 +1,31 @@
+name: Login
+main: Login\Login
+version: "1.0"
+api: [1.12.0]
+author: DeBe
+website: http://DeBe.ml
+
+commands:
+ login:
+  permission: login.cmd
+  description: <Password>
+  usage: /Login <Password>
+ register:
+  permission: register.cmd
+  description: <Password> <Password>
+  usage: /Register <Pasrword> <Password>
+ loginop:
+  permission: loginop.cmd
+  description: <UnRegister | Change> <PlayerName>
+  usage: /LoginOP <UnRegister | Change> <PlayerName> 
+
+permissions:
+ login.cmd:
+  default: true
+  description: Login - Login - Command
+ register.cmd:
+  default: true
+  description: Login - Register - Command
+ loginop.cmd:
+  default: op
+  description: Login - LoginOP - Command

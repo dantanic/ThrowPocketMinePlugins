@@ -1,0 +1,18 @@
+name: ServerPortal
+main: MineBlock\ServerPortal\ServerPortal
+version: "1.0"
+api: [1.12.0]
+author: MineBlock
+description: MineBlock's Plugin
+website: http://MineBlock.zz.am
+
+commands:
+ serverportal:
+  permission: serverportal.cmd
+  description: ServerPortal
+  usage: /ServerPortal <Add|Del|Reset|Respawn>
+
+permissions:
+ serverportal.cmd:
+  default: op
+  description: ServerPortal - Command

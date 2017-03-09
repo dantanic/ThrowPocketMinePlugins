@@ -1,0 +1,6 @@
+name: Fishing
+main: Fishing\Fishing
+version: "Dev1.1"
+api: [1.12.0]
+author: DeBe
+website: http://DeBe.ml

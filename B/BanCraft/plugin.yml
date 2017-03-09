@@ -1,0 +1,20 @@
+name: BanCraft
+main: BanCraft\BanCraft
+version: "1.0"
+api: [1.12.0]
+author: DeBe
+website: http://DeBe.ml
+
+commands:
+ bancraft:
+  permission: bancraft.cmd
+  description: <Add|Del|Reset|List|Load>
+  usage: /BanCraft <Add|Del|Reset|List|Load>
+
+permissions:
+ bancraft.cmd:
+  default: op
+  description: BanCraft - Command
+ bancraft.craft:
+  default: op
+  description: BanCraft - Craft

@@ -1,0 +1,20 @@
+name: ChatMute
+main: ChatMute\ChatMute
+version: "1.0"
+api: [1.12.0]
+author: DeBe
+website: http://DeBe.ml
+
+commands:
+ chatmute:
+  permission: chatmute.cmd
+  description: <Mute|AllMute>
+  usage: /ChatMute <Mute|AllMute>
+
+permissions:
+ chatmute.cmd:
+  default: op
+  description: ChatMute - Command
+ chatmute.chat:
+  default: op
+  description: ChatMute - Chat

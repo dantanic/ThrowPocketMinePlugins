@@ -1,0 +1,20 @@
+name: Shop
+main: Shop\Shop
+version: "1.0"
+api: [1.12.0]
+author: DeBe
+website: http://DeBe.ml
+
+commands:
+ shop:
+  permission: shop.cmd
+  description: <Add|Del|Reset>
+  usage: /Shop <Add|Del|Reset>
+
+permissions:
+ shop.cmd:
+  default: op
+  description: Shop - Command
+ shop.block:
+  default: op
+  description: Shop - Block
