@@ -1,0 +1,24 @@
+---
+Auto: true
+Sell: true
+Price: 100000
+Distance: 5
+Size: 1
+Air: 3
+MineWorld: Mine
+MineBlock: "48:0"
+Item: true
+Items:
+- - "269:0"
+  - 1
+- - "270:0"
+  - 1
+- - "271:0"
+  - 1
+- - "290:0"
+  - 1
+Farm:
+- mineblock
+Invite:
+  mineblock: []
+...

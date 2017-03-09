@@ -1,0 +1,18 @@
+name: ProtectArea
+main: MineBlock\ProtectArea\ProtectArea
+version: "1.0"
+api: [1.6.0]
+author: MineBlock
+description: MineBlock's Plugin
+website: http://MineBlock.zz.am
+
+commands:
+ protectarea:
+  permission: protectarea.cmd
+  description: MineBlock - ProtectArea - Command
+  usage: /ProtectArea <Add|Del|Reset|List|Load>
+
+permissions:
+ protectarea.cmd:
+  default: op
+  description: MineBlock - ProtectArea - Command
