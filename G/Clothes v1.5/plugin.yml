@@ -1,0 +1,23 @@
+name: Clothes
+main: Clothes\Clothes
+version: "1.5"
+api: [1.12.0]
+author: DeBe
+
+commands:
+ clothes:
+  permission: clothes.cmd
+  description: <Me|Buy|Sell|AllSell|List | Help>
+  usage: /Clothes <Me|Buy|Sell|AllSell|List| Help>
+ clothesop:
+  permission: clothesop.cmd
+  description: <Add|Del|List|Give|Take|View|ResetPlayers|ResetClothes | Help>
+  usage: /ClothesOp <Add|Del|List|Give|Take|View|ResetPlayers|ResetClothes | Help>
+
+permissions:
+ clothes.cmd:
+  default: true
+  description: Clothes > Command Clothes
+ clothesop.cmd:
+  default: op
+  description: Clothes > Command ClothesOp

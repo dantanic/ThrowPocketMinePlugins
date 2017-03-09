@@ -1,0 +1,6 @@
+name: AbilitySurvival
+main: AbilitySurvival\AbilitySurvival
+version: "1.0"
+api: [1.12.0]
+author: DeBe
+website: https://github.com/DeBe0/PocketMine-Plugins

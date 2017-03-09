@@ -1,0 +1,25 @@
+name: LevelAPI
+main: Level\LevelAPI
+version: "1.0"
+api: [1.12.0]
+author: DeBe
+website: https://github.com/DeBe0/PocketMine-Plugins
+
+commands:
+ level:
+  permission: level.level.cmd
+  description: Level - Level
+  usage: /Level <Me|View|Rank>
+  
+ levelapi:
+  permission: level.levelapi.cmd
+  description: Level - LevelAPI
+  usage: /LevelAPI <Set|Give|Take|Clear|Nick>
+
+permissions:
+ level.level.cmd:
+  default: true
+  description: Level - Level - Command
+ level.levelapi.cmd:
+  default: op
+  description: Level - LevelAPI - Command

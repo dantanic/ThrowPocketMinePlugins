@@ -1,0 +1,19 @@
+name: RubyTnTTag
+main: RubyTnTTag\RubyTnTTag
+authors: [Booohk,DeBe]
+version : DeBe v1.0
+api: [1.12.0]
+
+commands:
+ 로비:
+   description: 메인서버로 이동됩니다.
+ 전적:
+   description: 자신의 전적을 확인할수 있습니다.
+ 랭킹:
+   description: 랭킹을 봅니다
+ 나의랭킹:
+   description: 자신의 랭킹을 확인합니다
+ 상대랭킹:
+   description: 상대방의 랭킹을 확인합니다
+ 파티클:
+   description: 전적이 100넘어야 사용가능합니다

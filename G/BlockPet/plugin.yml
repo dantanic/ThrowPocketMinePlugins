@@ -1,0 +1,23 @@
+name: BlockPet
+main: BlockPet\BlockPet
+version: "1.0"
+api: 1.12.0
+author: DeBe
+
+commands:
+ blockpet:
+  permission: blockpet.blockpet.cmd
+  description: <>
+  usage: /BlockPet <>
+ blockpetop:
+  permission: blockpet.blockpetop.cmd
+  description: <>
+  usage: /BlockPetOP <>
+
+permissions:
+ blockpet.blockpet.cmd:
+  default: true
+  description: BlockPet - BlockPet - Command
+ blockpet.blockpetop.cmd:
+  default: op
+  description: BlockPet - BlockPetOP - Command

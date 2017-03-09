@@ -1,0 +1,16 @@
+name: Signoroid
+main: Signoroid\Signoroid
+version: "1.1"
+api: [1.12.0]
+author: DeBe
+
+commands:
+ signoroid:
+  permission: signoroid.cmd
+  description: Signoroid
+  usage: /Signoroid <Add|Del|Cange|Reset>
+
+permissions:
+ signoroid.cmd:
+  default: op
+  description: Signoroid - Command

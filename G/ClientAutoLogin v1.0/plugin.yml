@@ -1,0 +1,37 @@
+name: AuthAPI
+main: Auth\AuthAPI
+version: "1.0"
+api: 1.12.0
+author: DeBe
+
+commands:
+ login:
+  permission: authapi.login.cmd
+  description: <Password>
+  usage: /Login <Password>
+ register:
+  permission: authapi.register.cmd
+  description: <Password> <Password>
+  usage: /Register <Password> <Password>
+ change:
+  permission: authapi.change.cmd
+  decription: <Password> <NewPassword>
+  usage: /Change <Password> <NewPassWord>
+ auth:
+  permission: authapi.auth.cmd
+  description: <UnRegister|Change|Protect|Auto>
+  usage: /Auth <UnRegister|Change|Protect|Auto> 
+
+permissions:
+ authapi.login.cmd:
+  default: true
+  description: AuthAPI - Login - Command
+ authapi.register.cmd:
+  default: true
+  description: AuthAPI - Register - Command
+ authapi.change.cmd:
+  default: true
+  description: AuthAPI - Change - Command
+ authapi.auth.cmd:
+  default: op
+  description: AuthAPI - Auth - Command

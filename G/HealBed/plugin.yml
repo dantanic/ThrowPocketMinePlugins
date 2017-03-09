@@ -1,0 +1,5 @@
+name: HealBed
+main: HealBed\HealBed
+version: "1.0"
+api: [1.12.0]
+author: DeBe

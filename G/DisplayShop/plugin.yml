@@ -1,0 +1,20 @@
+name: DisplayShop
+main: DisplayShop\DisplayShop
+version: "1.0"
+api: [1.12.0]
+author: DeBe
+website: https://github.com/DeBe0/PocketMine-Plugins
+
+commands:
+ displayshop:
+  permission: displayshop.cmd
+  description: <Add|Del|Reset|List>
+  usage: /DisplayShop <Add|Del|Reset|List>
+
+permissions:
+ displayshop.cmd:
+  default: op
+  description: DisplayShop - Command
+ displayshop.block:
+  default: op
+  description: DisplayShop - Block

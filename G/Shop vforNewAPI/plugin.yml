@@ -1,0 +1,18 @@
+name: Shop
+main: Shop\Shop
+prefix: "§eShop"
+version: "forNewAPI"
+api: [1.12.0, 1.13.0]
+author: DeBe
+load: PostWorld
+
+commands:
+ shop:
+  permission: shop.cmd
+  description: <Add|Del|Change|Reset|Edit>
+  usage: /Shop <Add|Del|Change|Reset|Edit>
+
+permissions:
+ shop.cmd:
+  default: op
+  description: Shop - Command

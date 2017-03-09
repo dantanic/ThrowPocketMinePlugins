@@ -1,0 +1,16 @@
+name: AntiBlockLauncher
+main: AntiBlockLauncher\AntiBlockLauncher
+version: "1.0"
+api: [1.12.0]
+author: DeBe
+
+commands:
+ antiblocklauncher:
+  permission: antiblocklauncher.cmd
+  description: <On|OffAdd|Del|List | Help>
+  usage: /AntiBlockLauncherOp <On|OffAdd|Del|List | Help>
+
+permissions:
+ antiblocklauncher.cmd:
+  default: op
+  description: AntiBlockLauncher > Command AntiBlockLauncher
