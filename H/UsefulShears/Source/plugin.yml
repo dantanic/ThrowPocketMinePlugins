@@ -1,0 +1,7 @@
+name: UsefulShears
+main: UsefulShears\UsefulShears
+prefix: "UsefullShears"
+version: "1.0"
+api: [1.12.0, 1.13.0, 2.0.0]
+author: DeBe
+load: StartUP
